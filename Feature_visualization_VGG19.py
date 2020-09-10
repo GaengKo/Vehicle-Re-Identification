@@ -19,7 +19,7 @@ class Cnn:
 
     def _build_layers(self):
         IMG_SIZE=224
-        self.vgg_model = tf.keras.applications.VGG19(weights='imagenet',
+        self.vgg_model = tf.keras.applications.VGG16(weights='imagenet',
                                                 include_top=True,
                                                 input_shape=(IMG_SIZE, IMG_SIZE, 3))
         self.vgg_model.summary()
@@ -82,17 +82,17 @@ def main():
 
     #tr_X, te_X = (tr_X / 255.).reshape(-1, 224, 224, 3), (te_X / 255.).reshape(-1, 224, 224, 3)
     img1 = Image.open('./0624.jpg')
-    img2 = Image.open('./0720.jpg')
-    img3 = Image.open('./0659.jpg')
+    img2 = Image.open('./0624_similar.jpg')
+    img3 = Image.open('./0624_different.jpg')
 
     cnn = Cnn()
 
     #cnn.model.summary()
     #pre = cnn.model.predict(image)
-    cnn.create_CAM(img1)
+    #cnn.create_CAM(img1)
     x = list(range(512))
     conv_outputs, predictions,hist = cnn.get_feature(img1)
-    result = tf.keras.applications.vgg19.decode_predictions(predictions)
+    result = tf.keras.applications.vgg16.decode_predictions(predictions)
     # print(result)
     result = result[0][0]
     print('%s (%.2f%%)' % (result[1], result[2] * 100))
@@ -106,7 +106,7 @@ def main():
     plt.plot(x, hist, c='b',linewidth='0.5')
 
     conv_outputs, predictions, hist = cnn.get_feature(img3)
-    result = tf.keras.applications.vgg19.decode_predictions(predictions)
+    result = tf.keras.applications.vgg16.decode_predictions(predictions)
     # print(result)
     result = result[0][0]
     print('%s (%.2f%%)' % (result[1], result[2] * 100))
