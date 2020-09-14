@@ -1,6 +1,6 @@
 import numpy as np
 from PIL import Image
-
+from skimage import io, transform
 from torch.utils.data import Dataset
 from torch.utils.data.sampler import BatchSampler
 
@@ -81,33 +81,37 @@ class Triplet_Veri(Dataset):
     Test: Creates fixed triplets for testing
     """
 
-    def __init__(self, Veri_dataset):
+    def __init__(self, Veri_dataset,train):
+
+
+
+
         self.Veri_dataset = Veri_dataset
-        self.train = self.Veri_dataset.train
+        self.train = train
         self.transform = self.Veri_dataset.transform
 
         if self.train:
-            self.train_labels = self.Veri_dataset.train_labels
-            self.train_data = self.Veri_dataset.train_data
-            self.labels_set = set(self.train_labels.numpy())
-            self.label_to_indices = {label: np.where(self.train_labels.numpy() == label)[0]
+            self.train_labels = self.Veri_dataset.targets
+            self.train_data = self.Veri_dataset.samples
+            self.labels_set = set(np.array(self.train_labels))
+            self.label_to_indices = {label: np.where(np.array(self.train_labels) == label)[0]
                                      for label in self.labels_set}
 
         else:
-            self.test_labels = self.Veri_dataset.test_labels
-            self.test_data = self.Veri_dataset.test_data
+            self.test_labels = self.Veri_dataset.targets
+            self.test_data = self.Veri_dataset.samples
             # generate fixed triplets for testing
-            self.labels_set = set(self.test_labels.numpy())
-            self.label_to_indices = {label: np.where(self.test_labels.numpy() == label)[0]
+            self.labels_set = set(np.array(self.test_labels))
+            self.label_to_indices = {label: np.where(np.array(self.test_labels) == label)[0]
                                      for label in self.labels_set}
 
             random_state = np.random.RandomState(29)
 
             triplets = [[i,
-                         random_state.choice(self.label_to_indices[self.test_labels[i].item()]),
+                         random_state.choice(self.label_to_indices[self.test_labels[i]]),
                          random_state.choice(self.label_to_indices[
                                                  np.random.choice(
-                                                     list(self.labels_set - set([self.test_labels[i].item()]))
+                                                     list(self.labels_set - set([self.test_labels[i]]))
                                                  )
                                              ])
                          ]
@@ -116,7 +120,7 @@ class Triplet_Veri(Dataset):
 
     def __getitem__(self, index):
         if self.train:
-            img1, label1 = self.train_data[index], self.train_labels[index].item()
+            img1, label1 = self.train_data[index], self.train_labels[index]
             positive_index = index
             while positive_index == index:
                 positive_index = np.random.choice(self.label_to_indices[label1])
@@ -128,10 +132,12 @@ class Triplet_Veri(Dataset):
             img1 = self.test_data[self.test_triplets[index][0]]
             img2 = self.test_data[self.test_triplets[index][1]]
             img3 = self.test_data[self.test_triplets[index][2]]
-
-        img1 = Image.fromarray(img1.numpy(), mode='L')
-        img2 = Image.fromarray(img2.numpy(), mode='L')
-        img3 = Image.fromarray(img3.numpy(), mode='L')
+        img1 = transform.resize(io.imread(img1[0]), (224,224))
+        img1 = Image.fromarray(img1, mode='RGB')
+        img2 = transform.resize(io.imread(img2[0]), (224, 224))
+        img2 = Image.fromarray(img2, mode='RGB')
+        img3 = transform.resize(io.imread(img3[0]), (224, 224))
+        img3 = Image.fromarray(img3, mode='RGB')
         if self.transform is not None:
             img1 = self.transform(img1)
             img2 = self.transform(img2)
@@ -139,7 +145,7 @@ class Triplet_Veri(Dataset):
         return (img1, img2, img3), []
 
     def __len__(self):
-        return len(self.mnist_dataset)
+        return len(self.Veri_dataset)
 
 
 class TripletMNIST(Dataset):
