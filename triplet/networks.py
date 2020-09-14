@@ -5,19 +5,59 @@ import torch.nn.functional as F
 class EmbeddingNet(nn.Module):
     def __init__(self):
         super(EmbeddingNet, self).__init__()
-        self.convnet = nn.Sequential(nn.Conv2d(1, 32, 5), nn.PReLU(),
+        self.convnet = nn.Sequential(nn.Conv2d(3, 32, 5), nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2),
                                      nn.Conv2d(32, 64, 5), nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2))
-
-        self.fc = nn.Sequential(nn.Linear(64 * 4 * 4, 256),
+        """
+        self.convnet = nn.Sequential(
+            # 3 224 128
+            nn.Conv2d(3, 64, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(64, 64, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.MaxPool2d(2, 2),
+            # 64 112 64
+            nn.Conv2d(64, 128, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(128, 128, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.MaxPool2d(2, 2),
+            # 128 56 32
+            nn.Conv2d(128, 256, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(256, 256, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(256, 256, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.MaxPool2d(2, 2),
+            # 256 28 16
+            nn.Conv2d(256, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(512, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(512, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.MaxPool2d(2, 2),
+            # 512 14 8
+            nn.Conv2d(512, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(512, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(512, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.MaxPool2d(2, 2)
+        )
+        self.avg_pool = nn.AvgPool2d(7)
+        #self.classifier = nn.Linear(512, 10)
+        self.classifier = nn.Sequential(nn.Linear(512, 1000),
+                            nn.PReLU(),
+                            nn.Linear(1000, 100),
+                            nn.PReLU(),
+                            nn.Linear(100, 2)
+                            )        
+        """
+        self.fc = nn.Sequential(nn.Linear(64 * 53 * 53, 256),
                                 nn.PReLU(),
                                 nn.Linear(256, 256),
                                 nn.PReLU(),
                                 nn.Linear(256, 2)
                                 )
 
+    # 512 1 1
+
     def forward(self, x):
+        #output = self.convnet(x)
+        #x = self.avg_pool(output)
+        #x = x.view(output.size(0), -1)
+        #x = self.classifier(x)
         output = self.convnet(x)
         output = output.view(output.size()[0], -1)
         output = self.fc(output)

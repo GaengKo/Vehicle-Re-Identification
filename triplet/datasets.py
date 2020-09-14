@@ -83,9 +83,6 @@ class Triplet_Veri(Dataset):
 
     def __init__(self, Veri_dataset,train):
 
-
-
-
         self.Veri_dataset = Veri_dataset
         self.train = train
         self.transform = self.Veri_dataset.transform

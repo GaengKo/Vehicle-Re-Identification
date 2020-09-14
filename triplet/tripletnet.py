@@ -23,6 +23,7 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
 Veri_transform = transforms.Compose([
+    transforms.Resize((224,224)),
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
@@ -32,7 +33,7 @@ train_dataset = ImageFolder('../VeRi_train/test',transform=Veri_transform)
 test_dataset = ImageFolder('../VeRi_train/test',transform=Veri_transform)
 n_classes = 10
 #print(train_dataset.targets)
-
+"""
 m_train_dataset = MNIST('../data/MNIST', train=True, download=True,
                              transform=transforms.Compose([
                                  transforms.ToTensor(),
@@ -44,6 +45,7 @@ m_test_dataset = MNIST('../data/MNIST', train=False, download=True,
                                 transforms.ToTensor(),
                                 transforms.Normalize((mean,), (std,))
                             ]))
+"""
 
 n_classes = 10
 print(train_dataset.classes)
@@ -93,13 +95,15 @@ def extract_embeddings(dataloader, model):
         labels = np.zeros(len(dataloader.dataset))
         k = 0
         for images, target in dataloader:
-            print(len(images))
-            print(images[0].shape)
+            #images = transform.resize(io.imread(images), (224, 224))
+            #images = Image.fromarray(images, mode='RGB')
+            #print(len(images))
+            #print(images.shape)
             if cuda:
                 #images = torch.tensor(images)
-                images = images[0].cuda()
+                images = images.cuda()
             embeddings[k:k+len(images)] = model.get_embedding(images).data.cpu().numpy()
-            print(target)
+            #print(target)
             labels[k:k+len(images)] = target.numpy()
             k += len(images)
     return embeddings, labels
@@ -129,11 +133,11 @@ from skimage import io, transform
 triplet_train_dataset = Triplet_Veri(train_dataset,True) # Returns triplets of images
 triplet_test_dataset = Triplet_Veri(test_dataset, False)
 
-triplet_m_train_dataset = TripletMNIST(m_train_dataset) # Returns triplets of images
-triplet_m_test_dataset = TripletMNIST(m_test_dataset)
+#triplet_m_train_dataset = TripletMNIST(m_train_dataset) # Returns triplets of images
+#triplet_m_test_dataset = TripletMNIST(m_test_dataset)
 #torch.Size(np.asarray(triplet_train_dataset[0]))
 
-print(triplet_train_dataset.label_to_indices)
+#print(triplet_train_dataset.label_to_indices)
 print()
 #print(triplet_m_train_dataset.label_to_indices)
 print()
@@ -143,10 +147,10 @@ batch_size = 128
 kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
 triplet_train_loader = torch.utils.data.DataLoader(triplet_train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 triplet_test_loader = torch.utils.data.DataLoader(triplet_test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
-print(type(triplet_test_loader))
+#print(type(triplet_test_loader))
 
-triplet_m_train_loader = torch.utils.data.DataLoader(triplet_m_train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
-triplet_m_test_loader = torch.utils.data.DataLoader(triplet_m_test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
+#triplet_m_train_loader = torch.utils.data.DataLoader(triplet_m_train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
+#triplet_m_test_loader = torch.utils.data.DataLoader(triplet_m_test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
 
 # Set up the network and training parameters
 from networks import EmbeddingNet, TripletNet
@@ -158,17 +162,22 @@ model = TripletNet(embedding_net)
 if cuda:
     model.cuda()
 loss_fn = TripletLoss(margin)
-lr = 1e-3
-optimizer = optim.Adam(model.parameters(), lr=lr)
+#lr = 1e-3
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
 scheduler = lr_scheduler.StepLR(optimizer, 8, gamma=0.1, last_epoch=-1)
-n_epochs = 1
+n_epochs = 20
 log_interval = 100
 
-# %%
-fit(triplet_m_train_loader, triplet_m_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval)
 
 # %%
-train_embeddings_tl, train_labels_tl = extract_embeddings(triplet_m_train_loader, model)
+fit(triplet_train_loader, triplet_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval)
+
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
+
+
+# %%
+train_embeddings_tl, train_labels_tl = extract_embeddings(train_loader, model)
 plot_embeddings(train_embeddings_tl, train_labels_tl)
-val_embeddings_tl, val_labels_tl = extract_embeddings(triplet_m_test_loader, model)
-plot_embeddings(val_embeddings_tl, val_labels_tl)
+#val_embeddings_tl, val_labels_tl = extract_embeddings(test_loader, model)
+#plot_embeddings(val_embeddings_tl, val_labels_tl)
