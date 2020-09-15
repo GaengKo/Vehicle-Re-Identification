@@ -23,9 +23,11 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
 Veri_transform = transforms.Compose([
-    transforms.Resize((224,224)),
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
     transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
 mean, std = 0.1307, 0.3081
@@ -132,6 +134,7 @@ from datasets import TripletMNIST
 from skimage import io, transform
 triplet_train_dataset = Triplet_Veri(train_dataset,True) # Returns triplets of images
 triplet_test_dataset = Triplet_Veri(test_dataset, False)
+import os
 
 #triplet_m_train_dataset = TripletMNIST(m_train_dataset) # Returns triplets of images
 #triplet_m_test_dataset = TripletMNIST(m_test_dataset)
@@ -156,21 +159,39 @@ triplet_test_loader = torch.utils.data.DataLoader(triplet_test_dataset, batch_si
 from networks import EmbeddingNet, TripletNet
 from losses import TripletLoss
 
-margin = 1.
+margin = 2.
 embedding_net = EmbeddingNet()
 model = TripletNet(embedding_net)
 if cuda:
     model.cuda()
 loss_fn = TripletLoss(margin)
-#lr = 1e-3
-optimizer = optim.Adam(model.parameters(), lr=1e-3)
-scheduler = lr_scheduler.StepLR(optimizer, 8, gamma=0.1, last_epoch=-1)
-n_epochs = 20
+lr = 0.01
+optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
+scheduler = lr_scheduler.StepLR(optimizer,2, gamma=0.9, last_epoch=-1)
+n_epochs = 40
 log_interval = 100
+if os.path.isfile('./model/nn_checkpoint'):
+    checkpoint = torch.load('./model/nn_checkpoint')
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    model.train()
 
+torch.save({
+            'epoch': n_epochs,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss_fn,
+            }, './model/nnn_checkpoint')
 
 # %%
 fit(triplet_train_loader, triplet_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval)
+
+torch.save({
+            'epoch': n_epochs,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss_fn,
+            }, './model/nnn_checkpoint')
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
