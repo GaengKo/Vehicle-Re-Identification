@@ -159,7 +159,7 @@ triplet_test_loader = torch.utils.data.DataLoader(triplet_test_dataset, batch_si
 from networks import EmbeddingNet, TripletNet
 from losses import TripletLoss
 
-margin = 2.
+margin = 1.
 embedding_net = EmbeddingNet()
 model = TripletNet(embedding_net)
 if cuda:
@@ -168,7 +168,7 @@ loss_fn = TripletLoss(margin)
 lr = 0.01
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
 scheduler = lr_scheduler.StepLR(optimizer,2, gamma=0.9, last_epoch=-1)
-n_epochs = 40
+n_epochs = 300
 log_interval = 100
 if os.path.isfile('./model/nn_checkpoint'):
     checkpoint = torch.load('./model/nn_checkpoint')
@@ -181,7 +181,7 @@ torch.save({
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss_fn,
-            }, './model/nnn_checkpoint')
+            }, './model/asd_checkpoint')
 
 # %%
 fit(triplet_train_loader, triplet_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval)
@@ -191,7 +191,7 @@ torch.save({
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss_fn,
-            }, './model/nnn_checkpoint')
+            }, './model/asd_checkpoint')
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, **kwargs)

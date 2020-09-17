@@ -75,18 +75,14 @@ class EmbeddingNet(nn.Module):
                                 #nn.LeakyReLU(),
                                 #nn.Linear(10,2)
                                 )
-
-    # 512 1 1
-
     def forward(self, x):
+        output = self.model(x) # googleNet
+        output = self.fc(output) # nn.Linear(1000, 2)
+        return output
         #output = self.convnet(x)
         #x = self.avg_pool(output)
         #x = x.view(output.size(0), -1)
         #x = self.classifier(x)
-        output = self.model(x)
-        #output = output.view(output.size()[0], -1)
-        output = self.fc(output)
-        return output
 
     def get_embedding(self, x):
         return self.forward(x)
