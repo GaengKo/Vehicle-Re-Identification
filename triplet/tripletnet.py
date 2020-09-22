@@ -146,7 +146,7 @@ print()
 print()
 #print(triplet_m_train_dataset.train_data[0])
 
-batch_size = 128
+batch_size = 150
 kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
 triplet_train_loader = torch.utils.data.DataLoader(triplet_train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 triplet_test_loader = torch.utils.data.DataLoader(triplet_test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
@@ -159,19 +159,20 @@ triplet_test_loader = torch.utils.data.DataLoader(triplet_test_dataset, batch_si
 from networks import EmbeddingNet, TripletNet
 from losses import TripletLoss
 
-margin = 1.
+margin = 1
+
 embedding_net = EmbeddingNet()
 model = TripletNet(embedding_net)
 if cuda:
     model.cuda()
 loss_fn = TripletLoss(margin)
-lr = 0.01
+lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
-scheduler = lr_scheduler.StepLR(optimizer,2, gamma=0.9, last_epoch=-1)
-n_epochs = 300
-log_interval = 100
-if os.path.isfile('./model/nn_checkpoint'):
-    checkpoint = torch.load('./model/nn_checkpoint')
+scheduler = lr_scheduler.StepLR(optimizer,10, gamma=0.1, last_epoch=-1)
+n_epochs = 5
+log_interval = 1
+if os.path.isfile('./model/0922_checkpoint'):
+    checkpoint = torch.load('./model/0922_checkpoint')
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     model.train()
@@ -181,7 +182,7 @@ torch.save({
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss_fn,
-            }, './model/asd_checkpoint')
+            }, './model/0922_checkpoint')
 
 # %%
 fit(triplet_train_loader, triplet_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval)
@@ -191,7 +192,7 @@ torch.save({
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss_fn,
-            }, './model/asd_checkpoint')
+            }, './model/0922_checkpoint')
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, **kwargs)

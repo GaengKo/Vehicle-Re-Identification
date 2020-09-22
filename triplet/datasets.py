@@ -129,12 +129,9 @@ class Triplet_Veri(Dataset):
             img1 = self.test_data[self.test_triplets[index][0]]
             img2 = self.test_data[self.test_triplets[index][1]]
             img3 = self.test_data[self.test_triplets[index][2]]
-        img1 = transform.resize(io.imread(img1[0]), (224,224))
-        img1 = Image.fromarray(img1, mode='RGB')
-        img2 = transform.resize(io.imread(img2[0]), (224, 224))
-        img2 = Image.fromarray(img2, mode='RGB')
-        img3 = transform.resize(io.imread(img3[0]), (224, 224))
-        img3 = Image.fromarray(img3, mode='RGB')
+        img1 = Image.fromarray(io.imread(img1[0]), mode='RGB')
+        img2 = Image.fromarray(io.imread(img2[0]), mode='RGB')
+        img3 = Image.fromarray(io.imread(img3[0]), mode='RGB')
         if self.transform is not None:
             img1 = self.transform(img1)
             img2 = self.transform(img2)

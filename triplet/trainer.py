@@ -17,11 +17,10 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
         scheduler.step()
 
     for epoch in range(start_epoch, n_epochs):
-        scheduler.step()
 
         # Train stage
         train_loss, metrics = train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, metrics)
-
+        scheduler.step()
         message = 'Epoch: {}/{}. Train set: Average loss: {:.4f}'.format(epoch + 1, n_epochs, train_loss)
         for metric in metrics:
             message += '\t{}: {}'.format(metric.name(), metric.value())
@@ -78,13 +77,14 @@ def train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, met
 
         if batch_idx % log_interval == 0:
             message = 'Train: [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                batch_idx * len(data[0]), len(train_loader.dataset),
+                batch_idx * train_loader.batch_size, len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), np.mean(losses))
             for metric in metrics:
                 message += '\t{}: {}'.format(metric.name(), metric.value())
 
-            print(message)
-            losses = []
+            print("\r"+message,end='')
+            #losses = []
+    print()
 
     total_loss /= (batch_idx + 1)
     return total_loss, metrics
