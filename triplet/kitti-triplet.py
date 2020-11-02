@@ -21,6 +21,7 @@ We'll be working on MNIST dataset
 #from torchvision.datasets import MNIST
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
+import torch
 
 Veri_transform = transforms.Compose([
     transforms.Resize(224),
@@ -31,8 +32,12 @@ Veri_transform = transforms.Compose([
     ])
 
 mean, std = 0.1307, 0.3081
-train_dataset = ImageFolder('../VeRi_train/0000',transform=Veri_transform)
-test_dataset = ImageFolder('../VeRi_train/0000',transform=Veri_transform)
+#train_dataset = ImageFolder('../VeRi_train/train/train',transform=Veri_transform)
+train_dataset = ImageFolder('../VeRi_train/test_224/0000',transform=Veri_transform)
+print(len(train_dataset))
+#train_dataset, valid_dataset = torch.utils.data.random_split(total_dataset, [35000,8844])
+test_dataset = ImageFolder('../VeRi_train/train/test',transform=Veri_transform)
+print(len(test_dataset))
 #n_classes = 10
 #print(train_dataset.targets)
 """
@@ -50,7 +55,7 @@ m_test_dataset = MNIST('../data/MNIST', train=False, download=True,
 """
 
 #n_classes = 10
-print(train_dataset.classes)
+#print(total_dataset.classes)
 # %%
 """
 ## Common setup
@@ -133,7 +138,7 @@ from datasets import Triplet_Veri
 from datasets import TripletMNIST
 from skimage import io, transform
 triplet_train_dataset = Triplet_Veri(train_dataset,True) # Returns triplets of images
-triplet_test_dataset = Triplet_Veri(test_dataset, False)
+triplet_test_dataset = Triplet_Veri(test_dataset,False)
 import os
 
 #triplet_m_train_dataset = TripletMNIST(m_train_dataset) # Returns triplets of images
@@ -146,9 +151,9 @@ print()
 print()
 #print(triplet_m_train_dataset.train_data[0])
 
-batch_size = 150
+batch_size = 128
 kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
-triplet_train_loader = torch.utils.data.DataLoader(triplet_train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
+triplet_train_loader = torch.utils.data.DataLoader(triplet_train_dataset, batch_size=batch_size, shuffle=False, **kwargs)
 triplet_test_loader = torch.utils.data.DataLoader(triplet_test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
 #print(type(triplet_test_loader))
 
@@ -169,7 +174,7 @@ loss_fn = TripletLoss(margin)
 lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
 scheduler = lr_scheduler.StepLR(optimizer,10, gamma=0.1, last_epoch=-1)
-n_epochs = 30
+n_epochs = 10
 log_interval = 1
 if os.path.isfile('./model/1102_resize_checkpoint'):
     checkpoint = torch.load('./model/1102_resize_checkpoint')
@@ -195,7 +200,7 @@ torch.save({
             }, './model/1102_resize_checkpoint')
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 
 
 # %%

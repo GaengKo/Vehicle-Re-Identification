@@ -24,17 +24,17 @@ from torchvision.datasets import ImageFolder
 from datasets import BalancedBatchSampler
 
 Veri_transform = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
+    transforms.Resize(224),
+    #transforms.CenterCrop(224),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
 mean, std = 0.1307, 0.3081
-train_dataset = ImageFolder('../VeRi_train/test',transform=Veri_transform)
-test_dataset = ImageFolder('../VeRi_train/test',transform=Veri_transform)
-n_classes = 10
+train_dataset = ImageFolder('../VeRi_train/train/train',transform=Veri_transform)
+test_dataset = ImageFolder('../VeRi_train/train/test',transform=Veri_transform)
+#n_classes = 10
 #print(train_dataset.targets)
 """
 m_train_dataset = MNIST('../data/MNIST', train=True, download=True,
@@ -137,8 +137,8 @@ from metrics import AverageNonzeroTripletsMetric
 #triplet_train_dataset = Triplet_Veri(train_dataset,True) # Returns triplets of images
 #triplet_test_dataset = Triplet_Veri(test_dataset, False)
 import os
-train_batch_sampler = BalancedBatchSampler(train_dataset.targets, n_classes=n_classes, n_samples=25)
-test_batch_sampler = BalancedBatchSampler(test_dataset.targets, n_classes=10, n_samples=25)
+train_batch_sampler = BalancedBatchSampler(train_dataset.targets, n_classes=25, n_samples=15)
+test_batch_sampler = BalancedBatchSampler(test_dataset.targets, n_classes=25, n_samples=15)
 kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
 
 online_train_loader = torch.utils.data.DataLoader(train_dataset, batch_sampler=train_batch_sampler, **kwargs)
@@ -155,7 +155,7 @@ online_test_loader = torch.utils.data.DataLoader(test_dataset, batch_sampler=tes
 #triplet_m_test_loader = torch.utils.data.DataLoader(triplet_m_test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
 
 # Set up the network and training parameters
-from networks import EmbeddingNet, TripletNet
+from kittiNet import EmbeddingNet, TripletNet
 from losses import TripletLoss
 
 margin = 1
@@ -165,18 +165,25 @@ model = embedding_net
 if cuda:
     model.cuda()
 loss_fn = OnlineTripletLoss(margin, RandomNegativeTripletSelector(margin))
-lr = 1e-5
+lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
 scheduler = lr_scheduler.StepLR(optimizer,2, gamma=0.9, last_epoch=-1)
-n_epochs = 1
+n_epochs = 10
 log_interval = 1
 
-if os.path.isfile('./model/0922_online_checkpoint'):
+if os.path.isfile('./model/1102_online_checkpoint'):
     print('*load Data ㅋㅋ*')
-    checkpoint = torch.load('./model/0922_online_checkpoint')
+    checkpoint = torch.load('./model/1102_online_checkpoint')
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     model.train()
+
+torch.save({
+            'epoch': n_epochs,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss_fn,
+            }, './model/1102_online_checkpoint')
 
 # %%
 fit(online_train_loader, online_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval, metrics=[AverageNonzeroTripletsMetric()])
@@ -186,14 +193,14 @@ torch.save({
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss_fn,
-            }, './model/0922_online_checkpoint')
+            }, './model/1102_online_checkpoint')
 
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True, **kwargs)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=False, **kwargs)
+#train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True, **kwargs)
+#test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=False, **kwargs)
 
 # %%
-train_embeddings_tl, train_labels_tl = extract_embeddings(train_loader, model)
-print(len(train_labels_tl))
-plot_embeddings(train_embeddings_tl, train_labels_tl)
+#train_embeddings_tl, train_labels_tl = extract_embeddings(train_loader, model)
+#print(len(train_labels_tl))
+#plot_embeddings(train_embeddings_tl, train_labels_tl)
 #val_embeddings_tl, val_labels_tl = extract_embeddings(test_loader, model)
 #plot_embeddings(val_embeddings_tl, val_labels_tl)

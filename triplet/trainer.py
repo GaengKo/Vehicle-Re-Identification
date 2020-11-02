@@ -13,9 +13,9 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
     Siamese network: Siamese loader, siamese model, contrastive loss
     Online triplet learning: batch loader, embedding model, online triplet loss
     """
+    past_loss = 0
     for epoch in range(0, start_epoch):
         scheduler.step()
-
     for epoch in range(start_epoch, n_epochs):
 
         # Train stage
@@ -27,7 +27,15 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
 
         val_loss, metrics = test_epoch(val_loader, model, loss_fn, cuda, metrics)
         val_loss /= len(val_loader)
-
+        if past_loss == 0 or past_loss > val_loss:
+            past_loss = val_loss
+            print('**save best**')
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': loss_fn,
+            }, './model/0922_online_checkpoint')
+        
         message += '\nEpoch: {}/{}. Validation set: Average loss: {:.4f}'.format(epoch + 1, n_epochs,
                                                                                  val_loss)
         for metric in metrics:
@@ -56,25 +64,28 @@ def train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, met
 
         optimizer.zero_grad()
         outputs = model(*data)
-
+        #print(4,end='')
         if type(outputs) not in (tuple, list):
             outputs = (outputs,)
-
+        #print(5,end='')
         loss_inputs = outputs
         if target is not None:
             target = (target,)
             loss_inputs += target
-
+        #print(6,end='')
         loss_outputs = loss_fn(*loss_inputs)
+        #print(7, end='')
         loss = loss_outputs[0] if type(loss_outputs) in (tuple, list) else loss_outputs
         losses.append(loss.item())
         total_loss += loss.item()
+        #print(8, end='')
         loss.backward()
         optimizer.step()
-
+        #print(1)
+        #print(9)
         for metric in metrics:
             metric(outputs, target, loss_outputs)
-
+        #print(3)
         if batch_idx % log_interval == 0:
             message = 'Train: [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 batch_idx * len(data[0]), len(train_loader.dataset),
@@ -84,6 +95,7 @@ def train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, met
 
             print("\r"+message,end='')
             #losses = []
+        #print(2)
     print()
 
     total_loss /= (batch_idx + 1)
