@@ -29,6 +29,7 @@ for video in file_list:
                 os.makedirs('./test/' + video+'/'+data[1])
             dst = img.copy()
             dst = img[ int(float(data[7])):int(float(data[9])), int(float(data[6])) : (int(float(data[8])))]
+            dst = cv2.resize(dst, dsize=(224, 224), interpolation=cv2.INTER_AREA)
             cv2.imwrite('./test/' + video+'/'+data[1]+'/'+data[1]+' '+data[2]+'_'+data[0]+'.png',dst)
             count = count + 1
             #cv2.imshow("1234",dst)
