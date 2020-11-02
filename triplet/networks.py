@@ -63,18 +63,7 @@ class EmbeddingNet(nn.Module):
                             nn.Linear(100, 2)
                             )        
         """
-        self.fc = nn.Sequential(#nn.AvgPool2d(7),
-                                #nn.Linear(512, 100),
-                                #nn.PReLU(),
-                                #nn.Linear(100, 2)
-                                #nn.Linear(256 * 14 * 14, 256),
-                                #nn.PReLU(),
-                                #nn.Linear(256, 256),
-                                #nn.PReLU(),
-                                nn.Linear(1000, 2)
-                                #nn.LeakyReLU(),
-                                #nn.Linear(10,2)
-                                )
+        self.fc = nn.Sequential(nn.Linear(1000, 2))
     def forward(self, x):
         output = self.model(x) # googleNet
         output = self.fc(output) # nn.Linear(1000, 2)
