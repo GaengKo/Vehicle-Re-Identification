@@ -5,6 +5,7 @@ path = './label_02'
 image_path = 'G:/Trackingset'
 file_list = os.listdir(image_path)
 print(file_list)
+count = 0
 for video in file_list:
     #frame_list = os.listdir(path+'/'+video)
     if not(os.path.isdir('./test/'+video)):
@@ -28,7 +29,8 @@ for video in file_list:
                 os.makedirs('./test/' + video+'/'+data[1])
             dst = img.copy()
             dst = img[ int(float(data[7])):int(float(data[9])), int(float(data[6])) : (int(float(data[8])))]
-            cv2.imwrite('./test/' + video+'/'+data[1]+'/'+data[0]+' '+data[2]+'_'+data[0]+'.png',dst)
+            cv2.imwrite('./test/' + video+'/'+data[1]+'/'+data[1]+' '+data[2]+'_'+data[0]+'.png',dst)
+            count = count + 1
             #cv2.imshow("1234",dst)
             #img = cv2.rectangle(img,(int(float(data[6])),int(float(data[7]))),(int(float(data[8])),int(float(data[9]))),(0,0,255),2)
             #img = cv2.putText(img,data[1]+' '+data[2],(int(float(data[6])),int(float(data[7]))),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
@@ -39,3 +41,4 @@ for video in file_list:
 
 
         cv2.waitKey(1)
+print(count)
