@@ -8,8 +8,8 @@ print(file_list)
 count = 0
 for video in file_list:
     #frame_list = os.listdir(path+'/'+video)
-    if not(os.path.isdir('./test/'+video)):
-        os.makedirs('./test/'+video)
+    #if not(os.path.isdir('./test/'+video)):
+        #os.makedirs('./test/'+video)
     f = open(path + '/' + video + '.txt', 'r')
     lines = f.readlines()
     frame_num = '-1'
@@ -25,12 +25,12 @@ for video in file_list:
             print(img)
             img = cv2.imread(img)
         if data[2] != 'DontCare':
-            if not (os.path.isdir('./test/' + video+'/'+data[1])):
-                os.makedirs('./test/' + video+'/'+data[1])
+            if not (os.path.isdir('./test/' + video+'_'+data[1])):
+                os.makedirs('./test/' + video+'_'+data[1])
             dst = img.copy()
             dst = img[ int(float(data[7])):int(float(data[9])), int(float(data[6])) : (int(float(data[8])))]
             dst = cv2.resize(dst, dsize=(224, 224), interpolation=cv2.INTER_AREA)
-            cv2.imwrite('./test/' + video+'/'+data[1]+'/'+data[1]+' '+data[2]+'_'+data[0]+'.png',dst)
+            cv2.imwrite('./test/' + video+'_'+data[1]+'/'+data[1]+' '+data[2]+'_'+data[0]+'.png',dst)
             count = count + 1
             #cv2.imshow("1234",dst)
             #img = cv2.rectangle(img,(int(float(data[6])),int(float(data[7]))),(int(float(data[8])),int(float(data[9]))),(0,0,255),2)
