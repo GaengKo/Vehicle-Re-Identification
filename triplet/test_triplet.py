@@ -2,8 +2,9 @@ import cv2
 import os
 import torch
 from kittiNet import EmbeddingNet, TripletNet
-checkpoint = torch.load('./model/1102_online_checkpoint')
-model = EmbeddingNet()
+checkpoint = torch.load('./model/1102_resize_checkpoint')
+embedding_net = EmbeddingNet()
+model = TripletNet(embedding_net)
 
 model.load_state_dict(checkpoint['model_state_dict'])
 path = '../../../MOT-dataset/label_02/0000.txt'
@@ -59,13 +60,13 @@ for i in range(1,len(cropImage)):
     print(cropImage[i][0][1])
     img1 = Veri_transform(Image.fromarray(x1))
     img1 = img1.unsqueeze(0)
-    output1 = model.forward(img1)
+    output1 = model.get_embedding(img1)
     for j in range(len(cropImage[i-1])):
         x2 = numpy.array(cropImage[i-1][j][0])
         img2 =  Veri_transform(Image.fromarray(x2))
         img2 = img2.unsqueeze(0)
-        output2 = model.forward(img2)
-        result = (output2 - output1).pow(2).sum(1)
+        output2 = model.get_embedding(img2)
+        result = (output1-output2).pow(2).sum(1)
         print(str(cropImage[i][0][1])+' 과 '+str(cropImage[i-1][j][1])+'의 distance : '+str(result))
 
     if  i == 10:

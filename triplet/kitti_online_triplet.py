@@ -167,10 +167,10 @@ if cuda:
 loss_fn = OnlineTripletLoss(margin, RandomNegativeTripletSelector(margin))
 lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
-scheduler = lr_scheduler.StepLR(optimizer,2, gamma=0.9, last_epoch=-1)
+scheduler = lr_scheduler.StepLR(optimizer,10, gamma=0.8, last_epoch=-1)
 n_epochs = 10
 log_interval = 1
-
+"""
 if os.path.isfile('./model/1102_online_checkpoint'):
     print('*load Data ㅋㅋ*')
     checkpoint = torch.load('./model/1102_online_checkpoint')
@@ -184,7 +184,7 @@ torch.save({
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss_fn,
             }, './model/1102_online_checkpoint')
-
+"""
 # %%
 fit(online_train_loader, online_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval, metrics=[AverageNonzeroTripletsMetric()])
 

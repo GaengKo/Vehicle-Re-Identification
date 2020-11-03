@@ -3,7 +3,7 @@ from PIL import Image
 from skimage import io, transform
 from torch.utils.data import Dataset
 from torch.utils.data.sampler import BatchSampler
-
+import natsort
 
 class SiameseMNIST(Dataset):
     """
@@ -90,9 +90,17 @@ class Triplet_Veri(Dataset):
         if self.train:
             self.train_labels = self.Veri_dataset.targets
             self.train_data = self.Veri_dataset.samples
+            self.train_data = natsort.natsorted(self.train_data) # frame 순으로 다시 정렬
+            for i in range(len(self.train_data)):
+                self.train_labels[i] = self.train_data[i][1] # label 재정의
             self.labels_set = set(np.array(self.train_labels))
             self.label_to_indices = {label: np.where(np.array(self.train_labels) == label)[0]
                                      for label in self.labels_set}
+            print(len(self.label_to_indices))
+           # for i in range(len(self.label_to_indices)):
+            for i in range(len(self.train_data)):
+                if self.train_data[i][1] != self.train_labels[i]:
+                    print(self.train_data[i], self.train_labels[i])
 
         else:
             self.test_labels = self.Veri_dataset.targets
@@ -101,7 +109,7 @@ class Triplet_Veri(Dataset):
             self.labels_set = set(np.array(self.test_labels))
             self.label_to_indices = {label: np.where(np.array(self.test_labels) == label)[0]
                                      for label in self.labels_set}
-
+            print(len(self.label_to_indices))
             random_state = np.random.RandomState(29)
 
             triplets = [[i,
@@ -114,13 +122,20 @@ class Triplet_Veri(Dataset):
                          ]
                         for i in range(len(self.test_data))]
             self.test_triplets = triplets
+        #print(self.train_data[0:300])
+        #print()
+        #print(self.train_labels[0:20])
 
     def __getitem__(self, index):
         if self.train:
             img1, label1 = self.train_data[index], self.train_labels[index]
             positive_index = index
+            z = 0
             while positive_index == index:
                 positive_index = np.random.choice(self.label_to_indices[label1])
+                z = z + 1
+                if z % 100 == 99:
+                    break
             negative_label = np.random.choice(list(self.labels_set - set([label1])))
             negative_index = np.random.choice(self.label_to_indices[negative_label])
             img2 = self.train_data[positive_index]
@@ -185,8 +200,10 @@ class TripletMNIST(Dataset):
         if self.train:
             img1, label1 = self.train_data[index], self.train_labels[index].item()
             positive_index = index
+
             while positive_index == index:
                 positive_index = np.random.choice(self.label_to_indices[label1])
+
             negative_label = np.random.choice(list(self.labels_set - set([label1])))
             negative_index = np.random.choice(self.label_to_indices[negative_label])
             img2 = self.train_data[positive_index]

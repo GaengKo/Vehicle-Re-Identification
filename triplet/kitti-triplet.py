@@ -32,8 +32,8 @@ Veri_transform = transforms.Compose([
     ])
 
 mean, std = 0.1307, 0.3081
-#train_dataset = ImageFolder('../VeRi_train/train/train',transform=Veri_transform)
-train_dataset = ImageFolder('../VeRi_train/test_224/0000',transform=Veri_transform)
+train_dataset = ImageFolder('../VeRi_train/train/train',transform=Veri_transform)
+#train_dataset = ImageFolder('../VeRi_train/test_224/0000',transform=Veri_transform)
 print(len(train_dataset))
 #train_dataset, valid_dataset = torch.utils.data.random_split(total_dataset, [35000,8844])
 test_dataset = ImageFolder('../VeRi_train/train/test',transform=Veri_transform)
@@ -140,7 +140,7 @@ from skimage import io, transform
 triplet_train_dataset = Triplet_Veri(train_dataset,True) # Returns triplets of images
 triplet_test_dataset = Triplet_Veri(test_dataset,False)
 import os
-
+print(triplet_train_dataset.train_data[12800])
 #triplet_m_train_dataset = TripletMNIST(m_train_dataset) # Returns triplets of images
 #triplet_m_test_dataset = TripletMNIST(m_test_dataset)
 #torch.Size(np.asarray(triplet_train_dataset[0]))
@@ -177,6 +177,7 @@ scheduler = lr_scheduler.StepLR(optimizer,10, gamma=0.1, last_epoch=-1)
 n_epochs = 10
 log_interval = 1
 if os.path.isfile('./model/1102_resize_checkpoint'):
+    print("load mdoel[*]")
     checkpoint = torch.load('./model/1102_resize_checkpoint')
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
