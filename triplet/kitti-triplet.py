@@ -153,7 +153,7 @@ print()
 
 batch_size = 128
 kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
-triplet_train_loader = torch.utils.data.DataLoader(triplet_train_dataset, batch_size=batch_size, shuffle=False, **kwargs)
+triplet_train_loader = torch.utils.data.DataLoader(triplet_train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 triplet_test_loader = torch.utils.data.DataLoader(triplet_test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
 #print(type(triplet_test_loader))
 
@@ -173,8 +173,8 @@ if cuda:
 loss_fn = TripletLoss(margin)
 lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
-scheduler = lr_scheduler.StepLR(optimizer,10, gamma=0.1, last_epoch=-1)
-n_epochs = 10
+scheduler = lr_scheduler.StepLR(optimizer,10, gamma=0.8, last_epoch=-1)
+n_epochs = 200
 log_interval = 1
 if os.path.isfile('./model/1102_resize_checkpoint'):
     print("load mdoel[*]")

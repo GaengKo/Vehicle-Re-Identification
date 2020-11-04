@@ -2,13 +2,14 @@ import cv2
 import os
 import torch
 from kittiNet import EmbeddingNet, TripletNet
-checkpoint = torch.load('./model/1102_resize_checkpoint')
+checkpoint = torch.load('./model/1103_online_checkpoint')
 embedding_net = EmbeddingNet()
 model = TripletNet(embedding_net)
 
 model.load_state_dict(checkpoint['model_state_dict'])
-path = '../../../MOT-dataset/label_02/0000.txt'
-image_path = '../../../MOT-dataset/training/image_02/0000'
+model.eval()
+path = '../../../MOT-dataset/label_02/0004.txt'
+image_path = '../../../MOT-dataset/training/image_02/0004'
 file_list = os.listdir(image_path)
 #print(file_list)
 count = 0
@@ -44,7 +45,7 @@ for line in lines:
         #img = cv2.imread(img)
 
     #cv2.waitKey(1)
-print(count)
+#print(count)
 from torchvision import transforms
 from PIL import Image
 import numpy
@@ -55,20 +56,61 @@ Veri_transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     #transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
-for i in range(1,len(cropImage)):
-    x1 = numpy.array(cropImage[i][0][0])
-    print(cropImage[i][0][1])
-    img1 = Veri_transform(Image.fromarray(x1))
-    img1 = img1.unsqueeze(0)
-    output1 = model.get_embedding(img1)
-    for j in range(len(cropImage[i-1])):
-        x2 = numpy.array(cropImage[i-1][j][0])
-        img2 =  Veri_transform(Image.fromarray(x2))
-        img2 = img2.unsqueeze(0)
-        output2 = model.get_embedding(img2)
-        result = (output1-output2).pow(2).sum(1)
-        print(str(cropImage[i][0][1])+' 과 '+str(cropImage[i-1][j][1])+'의 distance : '+str(result))
+collect = 0
+discollect = 0
+check = []
+T = True
+#print(len(cropImage[0]))
+for i in range(len(cropImage)):
+    print('\r'+str(i)+' '+str(len(cropImage)),end='')
+    for q in range(len(cropImage[i])):
+        if cropImage[i][q][1] in check:
+            #print(i,cropImage[i][q][1])
+            x1 = numpy.array(cropImage[i][q][0])
+            #print(cropImage[i][0][1])
+            img1 = Veri_transform(Image.fromarray(x1))
+            img1 = img1.unsqueeze(0)
+            output1 = model.get_embedding(img1)
+            #print(cropImage[i][q][1])
+            frame = []
+            for k in range(1,4):
+                if i-k == -1:
+                    break
+                for j in range(len(cropImage[i-k])):
+                    temp = []
+                    x2 = numpy.array(cropImage[i-k][j][0])
+                    img2 =  Veri_transform(Image.fromarray(x2))
+                    img2 = img2.unsqueeze(0)
+                    output2 = model.get_embedding(img2)
+                    temp.append((output1-output2).pow(2).sum(1))
+                    temp.append(cropImage[i-k][j][1])
+                    temp.append(i-k)
+                    frame.append(temp)
+            min_value = -1
+            min_ob = -1
+            min_frame = -1
+            for k in range(len(frame)):
+                if min_value == -1 or min_value > frame[k][0]:
+                    min_value = frame[k][0]
+                    min_ob = frame[k][1]
+                    min_frame = frame[k][2]
+            #print(min_ob, min_value, min_frame)
+            if min_ob == cropImage[i][q][1]:
+                collect = collect + 1
+                #print("맞았다고 !")
 
-    if  i == 10:
-        break
+            else:
+                print('\n'+str(cropImage[i][q][1]+' '+str(min_ob)))
+                discollect = discollect + 1
+        else:
+            check.append(cropImage[i][q][1])
+            #print(str(cropImage[i][q][1])+' 등장 !')
+            #print(i)
+            #print(check)
+            #break
+            #result.append(frame)
+
+        #print(str(cropImage[i][0][1])+' 과 '+str(cropImage[i-1-k][j][1])+'의 distance : '+str(result))
+print(collect)
+print(discollect)
     #print(output1)
