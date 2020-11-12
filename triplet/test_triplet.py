@@ -2,14 +2,14 @@ import cv2
 import os
 import torch
 from kittiNet import EmbeddingNet, TripletNet
-checkpoint = torch.load('./model/1103_online_checkpoint')
+checkpoint = torch.load('./model/1105_RGBM_checkpoint')
 embedding_net = EmbeddingNet()
 model = TripletNet(embedding_net)
 
 model.load_state_dict(checkpoint['model_state_dict'])
 model.eval()
-path = '../../../MOT-dataset/label_02/0004.txt'
-image_path = '../../../MOT-dataset/training/image_02/0004'
+path = '../../../MOT-dataset/label_02/0001.txt'
+image_path = '../../../MOT-dataset/training/image_02/0001'
 file_list = os.listdir(image_path)
 #print(file_list)
 count = 0

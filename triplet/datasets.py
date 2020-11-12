@@ -117,7 +117,7 @@ class Triplet_Veri(Dataset):
                          random_state.choice(self.label_to_indices[
                                                  np.random.choice(
                                                      list(self.labels_set - set([self.test_labels[i]]))
-                                                 )
+                                                  )
                                              ])
                          ]
                         for i in range(len(self.test_data))]
