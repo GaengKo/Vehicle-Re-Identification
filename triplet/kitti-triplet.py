@@ -32,11 +32,11 @@ Veri_transform = transforms.Compose([
     ])
 
 mean, std = 0.1307, 0.3081
-train_dataset = ImageFolder('../VeRi_train/RGBM/train',transform=Veri_transform)
+train_dataset = ImageFolder('../VeRi_train/train/train',transform=Veri_transform)
 #train_dataset = ImageFolder('../VeRi_train/test_224/0000',transform=Veri_transform)
 print(len(train_dataset))
 #train_dataset, valid_dataset = torch.utils.data.random_split(total_dataset, [35000,8844])
-test_dataset = ImageFolder('../VeRi_train/RGBM/test',transform=Veri_transform)
+test_dataset = ImageFolder('../VeRi_train/train/test',transform=Veri_transform)
 print(len(test_dataset))
 #n_classes = 10
 #print(train_dataset.targets)
@@ -174,7 +174,7 @@ loss_fn = TripletLoss(margin)
 lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
 scheduler = lr_scheduler.StepLR(optimizer,10, gamma=0.8, last_epoch=-1)
-n_epochs = 50
+n_epochs = 100
 log_interval = 1
 """
 if os.path.isfile('./model/1102_resize_checkpoint'):
@@ -200,7 +200,7 @@ torch.save({
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss_fn,
-            }, './model/1105_RGBMLAST_checkpoint')
+            }, './model/210303_BN_result_checkpoint')
 
 #train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 #test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True, **kwargs)

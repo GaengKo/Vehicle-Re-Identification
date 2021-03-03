@@ -7,7 +7,10 @@ class EmbeddingNet(nn.Module):
     def __init__(self):
         super(EmbeddingNet, self).__init__()
         self.model = torch.hub.load('pytorch/vision:v0.6.0', 'googlenet', pretrained=True)
-        #self.fc = nn.Sequential(nn.Linear(1000, 2))
+        self.fc = nn.Sequential(nn.Linear(1000, 128),
+                                nn.BatchNorm1d(128)
+                                #nn.Tanh()
+                                ) 
     def forward(self, x):
         output = self.model(x) # googleNet
         #output = self.fc(output) # nn.Linear(1000, 2)
