@@ -7,7 +7,7 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
     """
     Loaders, model, loss function and metrics should work together for a given task,
     i.e. The model should be able to process data output of loaders,
-    loss function should process target output of loaders and outputs from the model
+    loss function should process target output of loaders and outputs from t}he model
 
     Examples: Classification: batch loader, classification model, NLL loss, accuracy metric
     Siamese network: Siamese loader, siamese model, contrastive loss
@@ -34,7 +34,7 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': loss_fn,
-            }, './model/210303_BN_checkpoint')
+            }, './model/210308_tanh_checkpoint')
         
         message += '\nEpoch: {}/{}. Validation set: Average loss: {:.4f}'.format(epoch + 1, n_epochs,
                                                                                  val_loss)

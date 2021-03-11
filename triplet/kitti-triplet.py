@@ -200,7 +200,7 @@ torch.save({
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss_fn,
-            }, './model/210303_BN_result_checkpoint')
+            }, './model/210308_tanh_result_checkpoint')
 
 #train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 #test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True, **kwargs)
