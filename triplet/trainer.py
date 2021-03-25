@@ -27,12 +27,12 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
 
         val_loss, metrics = test_epoch(val_loader, model, loss_fn, cuda, metrics)
         val_loss /= len(val_loader)
-        if past_loss == 0 or past_loss > val_loss:
-            past_loss = val_loss
-            print('**save best**')
-            torch.save({
-                'model_state_dict': model.state_dict()
-            }, './model/210324_DS_checkpoint')
+        #if past_loss == 0 or past_loss > val_loss:
+            #past_loss = val_loss
+            #print('**save best**')
+            #torch.save({
+            #    'model_state_dict': model.state_dict()
+            #}, './model/210324_DS_checkpoint')
         
         message += '\nEpoch: {}/{}. Validation set: Average loss: {:.4f}'.format(epoch + 1, n_epochs,
                                                                                  val_loss)

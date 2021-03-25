@@ -193,18 +193,21 @@ class Net(nn.Module):
     def forward(self, x):
         print(x.shape)
         x = self.conv(x)
+        print(x.shape)
         x = self.layer1(x)
+        print(x.shape)
         x = self.layer2(x)
+        print(x.shape)
         x = self.layer3(x)
-        #print(x.shape)
+        print(x.shape)
         x = x.view(x.size(0), -1)
-        #print(x.shape)
+        print(x.shape)
         x = self.dense[0](x)
-        #print(x.shape)
+        print(x.shape)
         x = self.dense[1](x)
-        #print(x)
+        print(x.shape)
         x = x.div(x.norm(p=2, dim=1, keepdim=True))
-        print(x)
+        print(x.shape)
         return x
 class DeepSortTriplet(nn.Module):
     def __init__(self, embedding_net):
