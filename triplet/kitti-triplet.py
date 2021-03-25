@@ -161,12 +161,12 @@ triplet_test_loader = torch.utils.data.DataLoader(triplet_test_dataset, batch_si
 #triplet_m_test_loader = torch.utils.data.DataLoader(triplet_m_test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
 
 # Set up the network and training parameters
-from kittiNet import EmbeddingNet, TripletNet
+from kittiNet import EmbeddingNet, TripletNet, Net
 from losses import TripletLoss
 
 margin = 1
 
-embedding_net = EmbeddingNet()
+embedding_net = Net()
 model = TripletNet(embedding_net)
 if cuda:
     model.cuda()
@@ -196,11 +196,8 @@ torch.save({
 fit(triplet_train_loader, triplet_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval)
 
 torch.save({
-            'epoch': n_epochs,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': loss_fn,
-            }, './model/210308_tanh_result_checkpoint')
+            'model_state_dict': model.state_dict()
+            }, './model/210324_DS_result_checkpoint')
 
 #train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 #test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True, **kwargs)
