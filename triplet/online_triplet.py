@@ -32,9 +32,9 @@ Veri_transform = transforms.Compose([
     ])
 
 mean, std = 0.1307, 0.3081
-train_dataset = ImageFolder('../VeRi_train/test',transform=Veri_transform)
-test_dataset = ImageFolder('../VeRi_train/test',transform=Veri_transform)
-n_classes = 10
+train_dataset = ImageFolder('../VeRi_train',transform=Veri_transform)
+test_dataset = ImageFolder('../VeRi_test',transform=Veri_transform)
+n_classes = 577
 #print(train_dataset.targets)
 """
 m_train_dataset = MNIST('../data/MNIST', train=True, download=True,

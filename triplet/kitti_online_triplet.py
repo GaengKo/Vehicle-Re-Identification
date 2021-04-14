@@ -32,8 +32,8 @@ Veri_transform = transforms.Compose([
     ])
 
 mean, std = 0.1307, 0.3081
-train_dataset = ImageFolder('../VeRi_train/train/train',transform=Veri_transform)
-test_dataset = ImageFolder('../VeRi_train/train/test',transform=Veri_transform)
+train_dataset = ImageFolder('../data/conferece_dataset/train/train',transform=Veri_transform)
+test_dataset = ImageFolder('../data/conferece_dataset/train/test',transform=Veri_transform)
 #n_classes = 10
 #print(train_dataset.targets)
 """
@@ -137,8 +137,8 @@ from metrics import AverageNonzeroTripletsMetric
 #triplet_train_dataset = Triplet_Veri(train_dataset,True) # Returns triplets of images
 #triplet_test_dataset = Triplet_Veri(test_dataset, False)
 import os
-train_batch_sampler = BalancedBatchSampler(train_dataset.targets, n_classes=25, n_samples=15)
-test_batch_sampler = BalancedBatchSampler(test_dataset.targets, n_classes=25, n_samples=15)
+train_batch_sampler = BalancedBatchSampler(train_dataset.targets, n_classes=50, n_samples=15)
+test_batch_sampler = BalancedBatchSampler(test_dataset.targets, n_classes=50, n_samples=15)
 kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
 
 online_train_loader = torch.utils.data.DataLoader(train_dataset, batch_sampler=train_batch_sampler, **kwargs)
@@ -168,7 +168,7 @@ loss_fn = OnlineTripletLoss(margin, RandomNegativeTripletSelector(margin))
 lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
 scheduler = lr_scheduler.StepLR(optimizer,10, gamma=0.8, last_epoch=-1)
-n_epochs = 10
+n_epochs = 100
 log_interval = 1
 """
 if os.path.isfile('./model/1102_online_checkpoint'):
@@ -183,7 +183,7 @@ torch.save({
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss_fn,
-            }, './model/1102_online_checkpoint')
+            }, './model/210408_checkpoint')
 """
 # %%
 fit(online_train_loader, online_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval, metrics=[AverageNonzeroTripletsMetric()])
@@ -193,7 +193,7 @@ torch.save({
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss_fn,
-            }, './model/1102_online_checkpoint')
+            }, './model/210408_checkpoint')
 
 #train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True, **kwargs)
 #test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=False, **kwargs)
