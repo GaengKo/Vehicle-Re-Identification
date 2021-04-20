@@ -27,8 +27,8 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
 
         val_loss, metrics = test_epoch(val_loader, model, loss_fn, cuda, metrics)
         val_loss /= len(val_loader)
-        print(val_loss)
-        print('**')
+        #print(val_loss)
+        #print('**')
         if past_loss == 0 or past_loss > val_loss:
             past_loss = val_loss
             print('**save best**')

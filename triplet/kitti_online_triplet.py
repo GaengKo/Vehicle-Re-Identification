@@ -137,8 +137,8 @@ from metrics import AverageNonzeroTripletsMetric
 #triplet_train_dataset = Triplet_Veri(train_dataset,True) # Returns triplets of images
 #triplet_test_dataset = Triplet_Veri(test_dataset, False)
 import os
-train_batch_sampler = BalancedBatchSampler(train_dataset.targets, n_classes=50, n_samples=15)
-test_batch_sampler = BalancedBatchSampler(test_dataset.targets, n_classes=50, n_samples=15)
+train_batch_sampler = BalancedBatchSampler(train_dataset.targets, n_classes=50, n_samples=10)
+test_batch_sampler = BalancedBatchSampler(test_dataset.targets, n_classes=50, n_samples=10)
 kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
 
 online_train_loader = torch.utils.data.DataLoader(train_dataset, batch_sampler=train_batch_sampler, **kwargs)
@@ -167,7 +167,7 @@ if cuda:
 loss_fn = OnlineTripletLoss(margin, RandomNegativeTripletSelector(margin))
 lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
-scheduler = lr_scheduler.StepLR(optimizer,10, gamma=0.8, last_epoch=-1)
+scheduler = lr_scheduler.StepLR(optimizer,2, gamma=0.9, last_epoch=-1)
 n_epochs = 100
 log_interval = 1
 """
