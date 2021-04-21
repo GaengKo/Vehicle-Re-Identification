@@ -13,7 +13,7 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
     Siamese network: Siamese loader, siamese model, contrastive loss
     Online triplet learning: batch loader, embedding model, online triplet loss
     """
-    past_loss = 0
+    past_loss = 0.3845
     for epoch in range(0, start_epoch):
         scheduler.step()
     for epoch in range(start_epoch, n_epochs):

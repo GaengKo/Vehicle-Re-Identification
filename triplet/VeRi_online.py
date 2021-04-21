@@ -123,24 +123,21 @@ model = embedding_net
 if cuda:
     model.cuda()
 loss_fn = OnlineTripletLoss(margin, RandomNegativeTripletSelector(margin))
-lr = 0.02
+lr = 0.01
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
 scheduler = lr_scheduler.StepLR(optimizer,2, gamma=0.9, last_epoch=-1)
-n_epochs = 50
+n_epochs = 100
 log_interval = 1
-"""
+
 if os.path.isfile('./model/VeRi_checkpoint'):
     print('*load Data ㅋㅋ*')
     checkpoint = torch.load('./model/VeRi_checkpoint')
     model.load_state_dict(checkpoint['model_state_dict'])
     model.train()
-"""
+
 # %%
 fit(online_train_loader, online_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval, metrics=[AverageNonzeroTripletsMetric()])
 
-torch.save({
-            'model_state_dict': model.state_dict()
-            }, './model/VeRi_checkpoint')
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True, **kwargs)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=False, **kwargs)
