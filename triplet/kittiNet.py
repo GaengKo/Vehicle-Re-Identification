@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
-
+from cbam import *
 
 class EmbeddingNet(nn.Module):
     def __init__(self):
@@ -95,30 +95,6 @@ class TripletNet(nn.Module):
     def get_embedding(self, x):
         return self.embedding_net(x)
 
-class SpatialGate(nn.Module):
-    def __init__(self):
-        super(SpatialGate, self).__init__()
-        kernel_size = 7
-        self.compress = ChannelPool()
-        self.spatial = BasicConv(2, 1, kernel_size, stride=1, padding=(kernel_size-1) // 2, relu=False)
-    def forward(self, x):
-        x_compress = self.compress(x)
-        x_out = self.spatial(x_compress)
-        scale = F.sigmoid(x_out) # broadcasting
-        return x * scale
-
-class CBAM(nn.Module):
-    def __init__(self, gate_channels, reduction_ratio=16, pool_types=['avg', 'max'], no_spatial=False):
-        super(CBAM, self).__init__()
-        self.ChannelGate = ChannelGate(gate_channels, reduction_ratio, pool_types)
-        self.no_spatial=no_spatial
-        if not no_spatial:
-            self.SpatialGate = SpatialGate()
-    def forward(self, x):
-        x_out = self.ChannelGate(x)
-        if not self.no_spatial:
-            x_out = self.SpatialGate(x_out)
-        return x_out
 
 class BasicBlock(nn.Module):
     def __init__(self, c_in, c_out, is_downsample=False):
@@ -132,6 +108,7 @@ class BasicBlock(nn.Module):
         self.relu = nn.ReLU(True)
         self.conv2 = nn.Conv2d(c_out, c_out, 3, stride=1, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(c_out)
+        self.cbam = CBAM(c_out,16)
         if is_downsample:
             self.downsample = nn.Sequential(
                 nn.Conv2d(c_in, c_out, 1, stride=2, bias=False),
@@ -152,6 +129,7 @@ class BasicBlock(nn.Module):
         y = self.bn2(y)
         if self.is_downsample:
             x = self.downsample(x)
+        y = self.cbam(y)
         return F.relu(x.add(y), True)
 
 
@@ -191,23 +169,23 @@ class Net(nn.Module):
             nn.ELU(inplace=True)
         )
     def forward(self, x):
-        print(x.shape)
+        #print(x.shape)
         x = self.conv(x)
-        print(x.shape)
+        #print(x.shape)
         x = self.layer1(x)
-        print(x.shape)
+        #print(x.shape)
         x = self.layer2(x)
-        print(x.shape)
+        #print(x.shape)
         x = self.layer3(x)
-        print(x.shape)
+        #print(x.shape)
         x = x.view(x.size(0), -1)
-        print(x.shape)
+        #print(x.shape)
         x = self.dense[0](x)
-        print(x.shape)
+        #print(x.shape)
         x = self.dense[1](x)
-        print(x.shape)
+        #print(x.shape)
         x = x.div(x.norm(p=2, dim=1, keepdim=True))
-        print(x.shape)
+        #print(x.shape)
         return x
 class DeepSortTriplet(nn.Module):
     def __init__(self, embedding_net):

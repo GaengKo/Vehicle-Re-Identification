@@ -63,7 +63,7 @@ class EmbeddingNet(nn.Module):
                             nn.Linear(100, 2)
                             )        
         """
-        self.fc = nn.Sequential(nn.Linear(1000, 2))
+        self.fc = nn.Sequential(nn.Linear(1000, 128))
     def forward(self, x):
         output = self.model(x) # googleNet
         output = self.fc(output) # nn.Linear(1000, 2)
