@@ -123,7 +123,7 @@ model = embedding_net
 if cuda:
     model.cuda()
 loss_fn = OnlineTripletLoss(margin, RandomNegativeTripletSelector(margin))
-lr = 0.01
+lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
 scheduler = lr_scheduler.StepLR(optimizer,2, gamma=0.9, last_epoch=-1)
 n_epochs = 100
