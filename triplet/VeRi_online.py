@@ -117,13 +117,13 @@ from losses import TripletLoss
 margin = 1
 
 #embedding_net = EmbeddingNet()
-embedding_net = Net()
+embedding_net = Net(
 #model = TripletNet(embedding_net)
 model = embedding_net
 if cuda:
     model.cuda()
 loss_fn = OnlineTripletLoss(margin, RandomNegativeTripletSelector(margin))
-lr = 1e-3
+lr = 1e-4
 optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
 scheduler = lr_scheduler.StepLR(optimizer,2, gamma=0.9, last_epoch=-1)
 n_epochs = 100

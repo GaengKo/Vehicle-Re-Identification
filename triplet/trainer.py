@@ -34,7 +34,7 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
             print('**save best**')
             torch.save({
                 'model_state_dict': model.state_dict()
-            }, './model/VeRi_checkpoint')
+            }, './model/RIAM_finetuning_checkpoint')
         
         message += '\nEpoch: {}/{}. Validation set: Average loss: {:.4f}'.format(epoch + 1, n_epochs,
                                                                                  val_loss)

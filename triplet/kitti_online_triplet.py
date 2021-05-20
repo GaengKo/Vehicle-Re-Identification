@@ -137,8 +137,8 @@ from metrics import AverageNonzeroTripletsMetric
 #triplet_train_dataset = Triplet_Veri(train_dataset,True) # Returns triplets of images
 #triplet_test_dataset = Triplet_Veri(test_dataset, False)
 import os
-train_batch_sampler = BalancedBatchSampler(train_dataset.targets, n_classes=50, n_samples=10)
-test_batch_sampler = BalancedBatchSampler(test_dataset.targets, n_classes=50, n_samples=10)
+train_batch_sampler = BalancedBatchSampler(train_dataset.targets, n_classes=50, n_samples=7)
+test_batch_sampler = BalancedBatchSampler(test_dataset.targets, n_classes=50, n_samples=7)
 kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
 
 online_train_loader = torch.utils.data.DataLoader(train_dataset, batch_sampler=train_batch_sampler, **kwargs)
@@ -155,12 +155,12 @@ online_test_loader = torch.utils.data.DataLoader(test_dataset, batch_sampler=tes
 #triplet_m_test_loader = torch.utils.data.DataLoader(triplet_m_test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
 
 # Set up the network and training parameters
-from kittiNet import EmbeddingNet, TripletNet
+from kittiNet import EmbeddingNet, TripletNet, Net
 from losses import TripletLoss
 
 margin = 1
 
-embedding_net = EmbeddingNet()
+embedding_net = Net()
 model = embedding_net
 if cuda:
     model.cuda()
@@ -170,14 +170,14 @@ optimizer = optim.Adam(model.parameters(), lr=lr,betas=(0.9, 0.999))
 scheduler = lr_scheduler.StepLR(optimizer,2, gamma=0.9, last_epoch=-1)
 n_epochs = 100
 log_interval = 1
-"""
-if os.path.isfile('./model/1102_online_checkpoint'):
-    print('*load Data ㅋㅋ*')
-    checkpoint = torch.load('./model/1102_online_checkpoint')
-    model.load_state_dict(checkpoint['model_state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    model.train()
 
+if os.path.isfile('./model/VeRi_checkpoint'):
+    print('*load Data ㅋㅋ*')
+    checkpoint = torch.load('./model/VeRi_checkpoint')
+    model.load_state_dict(checkpoint['model_state_dict'])
+    #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    model.train()
+"""
 torch.save({
             'epoch': n_epochs,
             'model_state_dict': model.state_dict(),
@@ -189,11 +189,8 @@ torch.save({
 fit(online_train_loader, online_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval, metrics=[AverageNonzeroTripletsMetric()])
 
 torch.save({
-            'epoch': n_epochs,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': loss_fn,
-            }, './model/210408_checkpoint')
+            'model_state_dict': model.state_dict()
+            }, './model/RIAM_finetuning_final_checkpoint')
 
 #train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True, **kwargs)
 #test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=False, **kwargs)
